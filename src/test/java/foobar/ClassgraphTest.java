@@ -13,8 +13,11 @@ public class ClassgraphTest {
   public void foo() {
       ClassGraph graph = new ClassGraph();
       graph.enableClassInfo();
+      graph.disableJarScanning();
+      graph.disableNestedJarScanning();
       try (ScanResult result = graph.scan()) {
         assertThat(result.getAllClasses()).isNotEmpty();
+        result.getAllClasses().forEach(clazz -> System.out.println("Found: " + clazz + " in file: " + clazz.getSourceFile()));
       }
   }
 }
