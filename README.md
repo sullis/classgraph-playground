@@ -9,7 +9,7 @@ tests: each one exercises a piece of the ClassGraph API and prints what it finds
 ## Requirements
 
 - Java 21 (an [SDKMAN!](https://sdkman.io) `.sdkmanrc` is included, pinned to `21.0.3-tem`)
-- Maven 3.9+
+- Maven (3.9+ recommended; not enforced by the build)
 
 ## Build and test
 
@@ -17,8 +17,8 @@ tests: each one exercises a piece of the ClassGraph API and prints what it finds
 mvn -ntp -B clean test
 ```
 
-Test output goes to the console, so use `-Dsurefire.useFile=false` or read
-`target/surefire-reports/` to see what the scans discovered.
+The tests print what the scans discovered to stdout, which appears in the
+console and in `target/surefire-reports/`.
 
 Run a single test class or method:
 
@@ -33,10 +33,11 @@ mvn -ntp test -Dtest=ClassgraphTest#findResourceFile
 
 | Test | ClassGraph feature |
 | --- | --- |
-| `findClasses` | `enableClassInfo()` scanning, then walking `ScanResult.getAllClasses()` and reading each class's source file |
+| `findClasses` | `enableClassInfo()` scanning, then walking `ScanResult.getAllClasses()` and printing each class's `SourceFile` attribute (`ClassInfo.getSourceFile()`) |
 | `findResourceFile` | Resource scanning — locating `data.txt` via `ScanResult.getAllResources()` and inspecting its path and classpath element URI |
 
-Both tests call `disableJarScanning()` and `disableNestedJarScanning()` so the
+Both tests call `enableClasspath()` plus `disableJarScanning()` and
+`disableNestedJarScanning()`, so the
 scan is limited to this project's own directory-based classpath entries, which
 keeps results small and deterministic.
 
@@ -51,8 +52,9 @@ src/test/resources/logback-test.xml  test logging configuration
 
 ## Notes
 
-- Surefire is configured with `forkCount=8` and `reuseForks=true`, so tests run
-  in parallel across several JVMs.
+- Surefire is configured with `forkCount=8` and `reuseForks=true`, so test classes
+  can run in parallel across several JVMs. Forking is per class, so with a single
+  test class only one JVM is used in practice.
 - Dependency updates arrive via Dependabot and are auto-merged once CI passes
   (see `.github/workflows/`).
 
