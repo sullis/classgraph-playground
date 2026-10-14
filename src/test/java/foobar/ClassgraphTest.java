@@ -12,6 +12,7 @@ public class ClassgraphTest {
   @Test
   public void findClasses() {
       ClassGraph graph = new ClassGraph();
+      graph.enableClasspath();
       graph.enableClassInfo();
       graph.disableJarScanning();
       graph.disableNestedJarScanning();
@@ -23,6 +24,7 @@ public class ClassgraphTest {
   @Test
   public void findResourceFile() {
     ClassGraph graph = new ClassGraph();
+    graph.enableClasspath();
     graph.disableJarScanning();
     graph.disableNestedJarScanning();
     try (ScanResult result = graph.scan()) {
