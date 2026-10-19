@@ -13,9 +13,10 @@ The build has two Maven modules with the same tests, one per ClassGraph major ve
 | `classgraph5` | 5.x | 21 |
 | `classgraph6` | 6.x | 25 (ClassGraph 6 is compiled for Java 25) |
 
-Each module sits in a Maven profile that switches on with the JDK version, so the
-JDK you build with decides which module builds: JDK 21 builds `classgraph5`, and
-JDK 25+ builds `classgraph6`. CI runs the build once on each JDK.
+`classgraph5` always builds. `classgraph6` sits in a Maven profile that switches on
+with JDK 25+, so the JDK you build with decides what builds: JDK 21 builds
+`classgraph5` only, and JDK 25+ builds both. CI runs the build once on each JDK.
+The build fails fast (via `maven-enforcer-plugin`) on JDKs older than 21.
 
 ## Requirements
 
@@ -27,7 +28,7 @@ JDK 25+ builds `classgraph6`. CI runs the build once on each JDK.
 ## Build and test
 
 ```bash
-mvn -ntp -B clean test        # on JDK 21 -> classgraph5, on JDK 25 -> classgraph6
+mvn -ntp -B clean test        # on JDK 21 -> classgraph5, on JDK 25 -> classgraph5 + classgraph6
 ```
 
 The tests print what the scans discovered to stdout, which appears in the
@@ -58,7 +59,7 @@ keeps results small and deterministic.
 ## Project layout
 
 ```
-pom.xml                                  parent POM: shared dependencies, plugins, JDK profiles
+pom.xml                                  parent POM: shared dependencies, plugins, JDK 25 profile
 classgraph5/, classgraph6/               one module per ClassGraph major version, same layout:
   src/main/java/foobar/HelloApp.java     trivial class, something for the scanner to find
   src/main/resources/data.txt            trivial resource, ditto
