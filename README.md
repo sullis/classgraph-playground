@@ -18,6 +18,9 @@ with JDK 25+, so the JDK you build with decides what builds: JDK 21 builds
 `classgraph5` only, and JDK 25+ builds both. CI runs the build once on each JDK.
 The build fails fast (via `maven-enforcer-plugin`) on JDKs older than 21.
 
+Upgrading from older ClassGraph versions? See
+[Porting ClassGraph 4.x code to ClassGraph 6.x](https://github.com/classgraph/classgraph/wiki/Porting-ClassGraph-4.x-code-to-ClassGraph-6.x).
+
 ## Requirements
 
 - Java 21 for `classgraph5`, Java 25 for `classgraph6` (an [SDKMAN!](https://sdkman.io)
