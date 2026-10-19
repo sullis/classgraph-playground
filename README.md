@@ -6,19 +6,32 @@ A small sandbox for experimenting with [ClassGraph](https://github.com/classgrap
 the JVM classpath and module scanning library. The interesting parts live in the
 tests: each one exercises a piece of the ClassGraph API and prints what it finds.
 
+The build has two Maven modules with the same tests, one per ClassGraph major version:
+
+| Module | ClassGraph | Java |
+| --- | --- | --- |
+| `classgraph5` | 5.x | 21 |
+| `classgraph6` | 6.x | 25 (ClassGraph 6 is compiled for Java 25) |
+
+Each module sits in a Maven profile that switches on with the JDK version, so the
+JDK you build with decides which module builds: JDK 21 builds `classgraph5`, and
+JDK 25+ builds `classgraph6`. CI runs the build once on each JDK.
+
 ## Requirements
 
-- Java 21 (an [SDKMAN!](https://sdkman.io) `.sdkmanrc` is included, pinned to `21.0.3-tem`)
+- Java 21 for `classgraph5`, Java 25 for `classgraph6` (an [SDKMAN!](https://sdkman.io)
+  `.sdkmanrc` is included at the root, pinned to `21.0.3-tem`; each module has its
+  own `.sdkmanrc` too, so with `sdkman_auto_env=true`, `cd classgraph6` switches you to Java 25)
 - Maven (3.9+ recommended; not enforced by the build)
 
 ## Build and test
 
 ```bash
-mvn -ntp -B clean test
+mvn -ntp -B clean test        # on JDK 21 -> classgraph5, on JDK 25 -> classgraph6
 ```
 
 The tests print what the scans discovered to stdout, which appears in the
-console and in `target/surefire-reports/`.
+console and in `<module>/target/surefire-reports/`.
 
 Run a single test class or method:
 
@@ -29,7 +42,8 @@ mvn -ntp test -Dtest=ClassgraphTest#findResourceFile
 
 ## What the tests demonstrate
 
-[`ClassgraphTest`](src/test/java/foobar/ClassgraphTest.java):
+`ClassgraphTest` ([classgraph5](classgraph5/src/test/java/foobar/ClassgraphTest.java),
+[classgraph6](classgraph6/src/test/java/foobar/ClassgraphTest.java)):
 
 | Test | ClassGraph feature |
 | --- | --- |
@@ -44,10 +58,12 @@ keeps results small and deterministic.
 ## Project layout
 
 ```
-src/main/java/foobar/HelloApp.java   trivial class, something for the scanner to find
-src/main/resources/data.txt          trivial resource, ditto
-src/test/java/foobar/                the ClassGraph experiments
-src/test/resources/logback-test.xml  test logging configuration
+pom.xml                                  parent POM: shared dependencies, plugins, JDK profiles
+classgraph5/, classgraph6/               one module per ClassGraph major version, same layout:
+  src/main/java/foobar/HelloApp.java     trivial class, something for the scanner to find
+  src/main/resources/data.txt            trivial resource, ditto
+  src/test/java/foobar/                  the ClassGraph experiments
+  src/test/resources/logback-test.xml    test logging configuration
 ```
 
 ## Notes
@@ -55,6 +71,7 @@ src/test/resources/logback-test.xml  test logging configuration
 - Surefire is configured with `forkCount=8` and `reuseForks=true`, so test classes
   can run in parallel across several JVMs. Forking is per class, so with a single
   test class only one JVM is used in practice.
+- Dependabot ignores ClassGraph major-version bumps, so each module stays on its major.
 - Dependency updates arrive via Dependabot and are auto-merged once CI passes
   (see `.github/workflows/`).
 
